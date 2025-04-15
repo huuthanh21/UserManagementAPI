@@ -38,7 +38,19 @@ var users = new List<User>
     new User { Id = 2, Name = "Jane Smith", Email = "jane.smith@example.com" }
 };
 
-app.MapGet("/users", () => users);
+app.MapGet("/users", (int? page, int? pageSize) =>
+{
+    const int defaultPageSize = 10;
+    page ??= 1;
+    pageSize ??= defaultPageSize;
+
+    var paginatedUsers = users
+        .Skip((page.Value - 1) * pageSize.Value)
+        .Take(pageSize.Value)
+        .ToList();
+
+    return Results.Ok(paginatedUsers);
+});
 
 app.MapGet("/users/{id}", (int id) =>
 {
