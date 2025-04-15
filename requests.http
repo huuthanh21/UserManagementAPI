@@ -1,10 +1,29 @@
-### Get all users
+### Get all users with a valid token
+GET http://localhost:5261/users
+Authorization: Bearer valid-token
+
+### Get all users without a token
 GET http://localhost:5261/users
 
-### Get a user by ID
+### Get a user by ID with a valid token
 GET http://localhost:5261/users/1
+Authorization: Bearer valid-token
 
-### Add a new user
+### Get a user by ID with an invalid token
+GET http://localhost:5261/users/1
+Authorization: Bearer invalid-token
+
+### Add a new user with a valid token
+POST http://localhost:5261/users
+Authorization: Bearer valid-token
+Content-Type: application/json
+
+{
+  "name": "Alice Johnson",
+  "email": "alice.johnson@example.com"
+}
+
+### Add a new user without a token
 POST http://localhost:5261/users
 Content-Type: application/json
 
@@ -13,8 +32,9 @@ Content-Type: application/json
   "email": "alice.johnson@example.com"
 }
 
-### Update an existing user
+### Update an existing user with a valid token
 PUT http://localhost:5261/users/1
+Authorization: Bearer valid-token
 Content-Type: application/json
 
 {
@@ -22,5 +42,19 @@ Content-Type: application/json
   "email": "john.updated@example.com"
 }
 
-### Delete a user by ID
+### Update an existing user with an invalid token
+PUT http://localhost:5261/users/1
+Authorization: Bearer invalid-token
+Content-Type: application/json
+
+{
+  "name": "John Updated",
+  "email": "john.updated@example.com"
+}
+
+### Delete a user by ID with a valid token
+DELETE http://localhost:5261/users/1
+Authorization: Bearer valid-token
+
+### Delete a user by ID without a token
 DELETE http://localhost:5261/users/1
