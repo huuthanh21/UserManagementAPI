@@ -32,11 +32,8 @@ app.MapControllers();
 
 app.MapGet("/", () => "Hello, World!");
 
-var users = new List<User>
-{
-    new User { Id = 1, Name = "John Doe", Email = "john.doe@example.com" },
-    new User { Id = 2, Name = "Jane Smith", Email = "jane.smith@example.com" }
-};
+var users = new List<User>();
+var usersLock = new object();
 
 app.MapGet("/users", (int? page, int? pageSize) =>
 {
@@ -75,8 +72,11 @@ app.MapPost("/users", (User user) =>
         return Results.BadRequest("Invalid email format.");
     }
 
-    user.Id = users.Count > 0 ? users.Max(u => u.Id) + 1 : 1;
-    users.Add(user);
+    lock (usersLock)
+    {
+        user.Id = users.Count > 0 ? users.Max(u => u.Id) + 1 : 1;
+        users.Add(user);
+    }
     return Results.Created($"/users/{user.Id}", user);
 });
 
@@ -102,14 +102,17 @@ app.MapPut("/users/{id}", (int id, User updatedUser) =>
 
 app.MapDelete("/users/{id}", (int id) =>
 {
-    var user = users.FirstOrDefault(u => u.Id == id);
-    if (user is null)
+    lock (usersLock)
     {
-        logger.LogWarning("User with ID {Id} not found.", id);
-        return Results.NotFound();
-    }
+        var user = users.FirstOrDefault(u => u.Id == id);
+        if (user is null)
+        {
+            logger.LogWarning("User with ID {Id} not found.", id);
+            return Results.NotFound();
+        }
 
-    users.Remove(user);
+        users.Remove(user);
+    }
     return Results.NoContent();
 });
 
