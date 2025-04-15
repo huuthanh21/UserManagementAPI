@@ -45,6 +45,16 @@ app.MapGet("/users/{id}", (int id) =>
 
 app.MapPost("/users", (User user) =>
 {
+    if (string.IsNullOrWhiteSpace(user.Name) || string.IsNullOrWhiteSpace(user.Email))
+    {
+        return Results.BadRequest("Name and Email are required.");
+    }
+
+    if (!IsValidEmail(user.Email))
+    {
+        return Results.BadRequest("Invalid email format.");
+    }
+
     user.Id = users.Count > 0 ? users.Max(u => u.Id) + 1 : 1;
     users.Add(user);
     return Results.Created($"/users/{user.Id}", user);
@@ -52,6 +62,16 @@ app.MapPost("/users", (User user) =>
 
 app.MapPut("/users/{id}", (int id, User updatedUser) =>
 {
+    if (string.IsNullOrWhiteSpace(updatedUser.Name) || string.IsNullOrWhiteSpace(updatedUser.Email))
+    {
+        return Results.BadRequest("Name and Email are required.");
+    }
+
+    if (!IsValidEmail(updatedUser.Email))
+    {
+        return Results.BadRequest("Invalid email format.");
+    }
+
     var user = users.FirstOrDefault(u => u.Id == id);
     if (user is null) return Results.NotFound();
 
@@ -68,5 +88,18 @@ app.MapDelete("/users/{id}", (int id) =>
     users.Remove(user);
     return Results.NoContent();
 });
+
+bool IsValidEmail(string email)
+{
+    try
+    {
+        var addr = new System.Net.Mail.MailAddress(email);
+        return addr.Address == email;
+    }
+    catch
+    {
+        return false;
+    }
+}
 
 app.Run();
