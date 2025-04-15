@@ -17,6 +17,18 @@ var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
+// Add middleware to log HTTP method, request path, and response status code
+app.Use(async (context, next) =>
+{
+    var method = context.Request.Method;
+    var path = context.Request.Path;
+
+    await next();
+
+    var statusCode = context.Response.StatusCode;
+    logger.LogInformation("HTTP {Method} {Path} responded with {StatusCode}", method, path, statusCode);
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
