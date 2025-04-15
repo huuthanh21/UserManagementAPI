@@ -17,7 +17,7 @@ var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-// Add middleware to catch unhandled exceptions and return consistent error responses
+// Error-handling middleware
 app.Use(async (context, next) =>
 {
     try
@@ -33,7 +33,28 @@ app.Use(async (context, next) =>
     }
 });
 
-// Add middleware to log HTTP method, request path, and response status code
+// Authentication middleware
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+    if (string.IsNullOrEmpty(token) || !IsValidToken(token))
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        await context.Response.WriteAsJsonAsync(new { error = "Unauthorized" });
+        return;
+    }
+
+    await next();
+});
+
+bool IsValidToken(string token)
+{
+    // Replace this with your actual token validation logic
+    return token == "valid-token";
+}
+
+// Logging middleware
 app.Use(async (context, next) =>
 {
     var method = context.Request.Method;
