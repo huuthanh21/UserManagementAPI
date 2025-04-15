@@ -17,6 +17,22 @@ var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
+// Add middleware to catch unhandled exceptions and return consistent error responses
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An unhandled exception occurred.");
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { error = "Internal server error." });
+    }
+});
+
 // Add middleware to log HTTP method, request path, and response status code
 app.Use(async (context, next) =>
 {
