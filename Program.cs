@@ -32,7 +32,14 @@ app.MapControllers();
 
 app.MapGet("/", () => "Hello, World!");
 
-var users = new List<User>();
+var users = new List<User>
+{
+    new User { Id = 1, Name = "Alice Johnson", Email = "alice.johnson@example.com" },
+    new User { Id = 2, Name = "Bob Smith", Email = "bob.smith@example.com" },
+    new User { Id = 3, Name = "Charlie Brown", Email = "charlie.brown@example.com" },
+    new User { Id = 4, Name = "Diana Prince", Email = "diana.prince@example.com" },
+    new User { Id = 5, Name = "Eve Adams", Email = "eve.adams@example.com" }
+};
 var usersLock = new object();
 
 app.MapGet("/users", (int? page, int? pageSize) =>
